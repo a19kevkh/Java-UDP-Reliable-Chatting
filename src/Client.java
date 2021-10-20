@@ -16,8 +16,8 @@ public class Client extends Thread implements ActionListener {
     String clientName; //ta bort sen
     String name;
     int NETWORK_FAILURE_RATE;
-    int secondsPassed;
-    boolean gotMessage;
+    boolean sent;
+
     // Start up GUI (runs in its own thread)
 
     public Client(int clientPortNumber, String name) {
@@ -51,6 +51,23 @@ public class Client extends Thread implements ActionListener {
         }
     }
 
+    public void checkTimer(String msg){
+        Timer t = new Timer();
+        t.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        if(sent){
+                            System.err.println("Oops! message not sent: " + msg);
+                        }
+                        // close the thread
+                        t.cancel();
+                    }
+                },
+                1000
+        );
+    }
+
     public void run() {
         chatGUI = new ChatGUI(this,name);
 
@@ -60,8 +77,8 @@ public class Client extends Thread implements ActionListener {
         // Get the message within packet
         String replyMessage = clientEnd.unmarshall(replyPacket.getData());
         //System.out.println(name + " received: " + replyMessage);
+        sent = false;
         chatGUI.displayMessage(replyMessage);
-        gotMessage = true;
         //String replyMessageTrim = replyMessage.trim();
         //System.err.println(replyMessageTrim+ ". " +name+" stop: "+System.nanoTime());
         }
@@ -86,34 +103,14 @@ public class Client extends Thread implements ActionListener {
 
         // send the message
         if(failed(30)){
-            System.err.println("FAILED");
-            gotMessage = false;
+
         }
         else{
             clientEnd.sendPacket(messagePacket);
-            System.err.println("SUCCESS");
-            gotMessage = true;
         }
 
-        secondsPassed = 0;
-        Timer myTimer = new Timer();
-        TimerTask task = new TimerTask(){
-            public void run(){
-                secondsPassed++;
-                System.out.println(secondsPassed);
-            }
-        };
-        myTimer.schedule(task,0,1000);
-        if(secondsPassed > 1 && gotMessage == false){
-            System.err.println("Oops! message not sent: " + message);
-            myTimer.cancel();
-            task.cancel();
-        }
-        else if(secondsPassed > 1 && gotMessage == true){
-            myTimer.purge();
-            task.cancel();
-        }
-
+        sent = true;
+        checkTimer(message);
         //System.err.println(name+ " start: "+System.nanoTime());
 
         // clear the GUI input field, using a utility function of ChatGUI
