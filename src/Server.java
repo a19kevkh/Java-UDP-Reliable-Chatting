@@ -47,11 +47,11 @@ public class Server extends Thread {
         for (int i = 0; i < memberNames.size(); i++) {
             sendPrivateMessage(message, sender, memberNames.get(i));
         }
-        /* To test RTT
+
         if(connectedMembers.size() >= 4){
             sendPrivateMessage("BROADCAST DONE", "Server", "client4");
         }
-        */
+
     }
 
     public void sendToAddress(String sender, String msg, InetAddress address, int port){

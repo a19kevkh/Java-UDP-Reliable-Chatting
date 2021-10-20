@@ -58,7 +58,7 @@ public class Client extends Thread implements ActionListener {
                     @Override
                     public void run() {
                         if(sent){
-                            System.err.println("Oops! message not sent: ");
+                            System.err.println("Oops! message not sent");
                             sendPacket(messagePacket);
                         }
                         // close the thread
@@ -88,6 +88,7 @@ public class Client extends Thread implements ActionListener {
         String replyMessage = clientEnd.unmarshall(replyPacket.getData());
         //System.out.println(name + " received: " + replyMessage);
         sent = false;
+        System.out.println(replyMessage.trim() + " Stop: " + System.currentTimeMillis());
         chatGUI.displayMessage(replyMessage);
         //String replyMessageTrim = replyMessage.trim();
         //System.err.println(replyMessageTrim+ ". " +name+" stop: "+System.nanoTime());
@@ -110,7 +111,7 @@ public class Client extends Thread implements ActionListener {
         // create packet to carry the message, assuming any message fits
         // a packet size
         messagePacket = clientEnd.makeNewPacket(message, serverAddress, serverPortNumber);
-
+        System.out.println(name + " Start: " + System.currentTimeMillis());
        sendPacket(messagePacket);
        chatGUI.clearInput();
     }
