@@ -25,7 +25,7 @@ public class Client extends Thread implements ActionListener {
         // Create an endPoint on this computer to this
         // program identified by the provided port
         clientEnd = new EndPoint(clientPortNumber, name);
-        //chatGUI = new ChatGUI(this,name);
+        NETWORK_FAILURE_RATE = 30;
     }
 
     // Client parameters include server references for processing transmissions
@@ -51,14 +51,15 @@ public class Client extends Thread implements ActionListener {
         }
     }
 
-    public void checkTimer(String msg){
+    public void checkTimer(DatagramPacket messagePacket){
         Timer t = new Timer();
         t.schedule(
                 new TimerTask() {
                     @Override
                     public void run() {
                         if(sent){
-                            System.err.println("Oops! message not sent: " + msg);
+                            System.err.println("Oops! message not sent: ");
+                            sendPacket(messagePacket);
                         }
                         // close the thread
                         t.cancel();
@@ -66,6 +67,15 @@ public class Client extends Thread implements ActionListener {
                 },
                 1000
         );
+    }
+
+    public void sendPacket(DatagramPacket messagePacket){
+        // send the message
+        sent = true;
+        if(!failed(NETWORK_FAILURE_RATE)){
+            clientEnd.sendPacket(messagePacket);
+        }
+        checkTimer(messagePacket);
     }
 
     public void run() {
@@ -101,20 +111,7 @@ public class Client extends Thread implements ActionListener {
         // a packet size
         messagePacket = clientEnd.makeNewPacket(message, serverAddress, serverPortNumber);
 
-        // send the message
-        if(failed(30)){
-
-        }
-        else{
-            clientEnd.sendPacket(messagePacket);
-        }
-
-        sent = true;
-        checkTimer(message);
-        //System.err.println(name+ " start: "+System.nanoTime());
-
-        // clear the GUI input field, using a utility function of ChatGUI
-        chatGUI.clearInput();
-        //chatGUI.displayMessage(message);    //Ta bort sen
+       sendPacket(messagePacket);
+       chatGUI.clearInput();
     }
 }
