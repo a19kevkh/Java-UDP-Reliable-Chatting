@@ -25,7 +25,7 @@ public class Client extends Thread implements ActionListener {
         // Create an endPoint on this computer to this
         // program identified by the provided port
         clientEnd = new EndPoint(clientPortNumber, name);
-        NETWORK_FAILURE_RATE = 30;
+        NETWORK_FAILURE_RATE = 50;
     }
 
     // Client parameters include server references for processing transmissions
@@ -88,7 +88,7 @@ public class Client extends Thread implements ActionListener {
         String replyMessage = clientEnd.unmarshall(replyPacket.getData());
         //System.out.println(name + " received: " + replyMessage);
         sent = false;
-        System.out.println(replyMessage.trim() + " Stop: " + System.currentTimeMillis());
+        System.out.println(replyMessage.trim() + " Stop: " + System.nanoTime());
         chatGUI.displayMessage(replyMessage);
         //String replyMessageTrim = replyMessage.trim();
         //System.err.println(replyMessageTrim+ ". " +name+" stop: "+System.nanoTime());
@@ -111,7 +111,7 @@ public class Client extends Thread implements ActionListener {
         // create packet to carry the message, assuming any message fits
         // a packet size
         messagePacket = clientEnd.makeNewPacket(message, serverAddress, serverPortNumber);
-        System.out.println(name + " Start: " + System.currentTimeMillis());
+        System.out.println(name + " Start: " + System.nanoTime());
        sendPacket(messagePacket);
        chatGUI.clearInput();
     }
